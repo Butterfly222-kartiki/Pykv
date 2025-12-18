@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PyKV Mini UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            width: 350px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 15px;
+            background: #eef;
+            padding: 10px;
+            min-height: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>🔑 PyKV Store</h2>
+
+    <input type="text" id="key" placeholder="Enter key">
+    <input type="text" id="value" placeholder="Enter value (for SET)">
+
+    <button onclick="setKey()">SET</button>
+    <button onclick="getKey()">GET</button>
+    <button onclick="deleteKey()">DELETE</button>
+
+    <div class="result" id="result">Result will appear here</div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+
+    function setKey() {
+        const key = document.getElementById("key").value;
+        const value = document.getElementById("value").value;
+
+        fetch(API_URL + "/set", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key, value })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("result").innerText =
+                "SET SUCCESS: " + JSON.stringify(data);
+        });
+    }
+
+    function getKey() {
+        const key = document.getElementById("key").value;
+
+        fetch(API_URL + "/get/" + key)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("result").innerText =
+                "GET RESULT: " + JSON.stringify(data);
+        })
+        .catch(() => {
+            document.getElementById("result").innerText =
+                "Key not found";
+        });
+    }
+
+    function deleteKey() {
+        const key = document.getElementById("key").value;
+
+        fetch(API_URL + "/delete/" + key, { method: "DELETE" })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("result").innerText =
+                "DELETE RESULT: " + JSON.stringify(data);
+        });
+    }
+</script>
+
+</body>
+</html>
