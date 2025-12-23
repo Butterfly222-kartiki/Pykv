@@ -1,111 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>PyKV Mini UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyKV Store - Enhanced UI</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .box {
-            background: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            width: 350px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        h2 {
-            text-align: center;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        input {
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .operations-panel {
+            grid-row: span 2;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"] {
             width: 100%;
-            padding: 8px;
-            margin: 8px 0;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
         }
 
         .result {
-            margin-top: 15px;
-            background: #eef;
-            padding: 10px;
-            min-height: 40px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 60px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #28a745;
+        }
+
+        .status-offline {
+            background: #dc3545;
+        }
+
+        .performance-panel {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .ttl-input {
+            width: 80px;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .operations-panel {
+                grid-row: span 1;
+            }
         }
     </style>
 </head>
+
 <body>
 
-<div class="box">
-    <h2>🔑 PyKV Store</h2>
+    <div class="container">
+        <!-- Operations Panel -->
+        <div class="panel operations-panel">
+            <h2>PyKV Operations</h2>
 
-    <input type="text" id="key" placeholder="Enter key">
-    <input type="text" id="value" placeholder="Enter value (for SET)">
+            <div class="input-group">
+                <label for="key">Key:</label>
+                <input type="text" id="key" placeholder="Enter key (e.g., user:123)">
+            </div>
 
-    <button onclick="setKey()">SET</button>
-    <button onclick="getKey()">GET</button>
-    <button onclick="deleteKey()">DELETE</button>
+            <div class="input-group">
+                <label for="value">Value:</label>
+                <input type="text" id="value" placeholder="Enter value (for SET operations)">
+            </div>
 
-    <div class="result" id="result">Result will appear here</div>
-</div>
+            <div class="input-group">
+                <label for="ttl">TTL (seconds, optional):</label>
+                <input type="number" id="ttl" placeholder="Time to live in seconds">
+            </div>
 
-<script>
-    const API_URL = "http://127.0.0.1:8000";
+            <div class="button-group">
+                <button class="btn-primary" onclick="setKey()">SET</button>
+                <button class="btn-success" onclick="getKey()">GET</button>
+                <button class="btn-danger" onclick="deleteKey()">DELETE</button>
+                <button class="btn-secondary" onclick="clearInputs()">CLEAR</button>
+            </div>
 
-    function setKey() {
-        const key = document.getElementById("key").value;
-        const value = document.getElementById("value").value;
+            <div class="result" id="result">Ready for operations...</div>
+        </div>
 
-        fetch(API_URL + "/set", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key, value })
-        })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("result").innerText =
-                "SET SUCCESS: " + JSON.stringify(data);
+        <!-- Server Status Panel -->
+        <div class="panel">
+            <h2>
+                <span class="status-indicator" id="statusIndicator"></span>
+                Server Status
+            </h2>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="storeSize">-</div>
+                    <div class="stat-label">Total Keys</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="uptime">-</div>
+                    <div class="stat-label">Uptime (s)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="cacheHits">-</div>
+                    <div class="stat-label">Cache Hits</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="cacheMisses">-</div>
+                    <div class="stat-label">Cache Misses</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-info" onclick="refreshStats()">Refresh Stats</button>
+                <button class="btn-secondary" onclick="triggerCompaction()">Compact Log</button>
+            </div>
+        </div>
+
+        <!-- Performance Panel -->
+        <div class="panel performance-panel">
+            <h2>Performance Metrics</h2>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="opsPerSec">-</div>
+                    <div class="stat-label">Ops/Second</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="avgLatency">-</div>
+                    <div class="stat-label">Avg Latency (ms)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="errorRate">-</div>
+                    <div class="stat-label">Error Rate (%)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="p95Latency">-</div>
+                    <div class="stat-label">P95 Latency (ms)</div>
+                </div>
+            </div>
+
+            <div class="result" id="performanceDetails">Loading performance data...</div>
+
+            <button class="btn-info" onclick="refreshPerformance()" style="width: 100%; margin-top: 12px;">
+                Refresh Performance
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+        let autoRefresh = true;
+
+        // Initialize the UI
+        document.addEventListener('DOMContentLoaded', function () {
+            checkServerStatus();
+            refreshStats();
+            refreshPerformance();
+
+            // Auto-refresh every 5 seconds
+            setInterval(() => {
+                if (autoRefresh) {
+                    checkServerStatus();
+                    refreshStats();
+                    refreshPerformance();
+                }
+            }, 5000);
         });
-    }
 
-    function getKey() {
-        const key = document.getElementById("key").value;
+        async function setKey() {
+            const key = document.getElementById("key").value.trim();
+            const value = document.getElementById("value").value.trim();
+            const ttl = document.getElementById("ttl").value.trim();
 
-        fetch(API_URL + "/get/" + key)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("result").innerText =
-                "GET RESULT: " + JSON.stringify(data);
-        })
-        .catch(() => {
-            document.getElementById("result").innerText =
-                "Key not found";
+            if (!key || !value) {
+                showResult("Please enter both key and value", "error");
+                return;
+            }
+
+            const payload = { key, value };
+            if (ttl && parseInt(ttl) > 0) {
+                payload.ttl = parseInt(ttl);
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/set`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult(`SET SUCCESS\n${JSON.stringify(data, null, 2)}`, "success");
+                } else {
+                    showResult(`SET FAILED\n${JSON.stringify(data, null, 2)}`, "error");
+                }
+            } catch (error) {
+                showResult(`Network Error: ${error.message}`, "error");
+            }
+        }
+
+        async function getKey() {
+            const key = document.getElementById("key").value.trim();
+
+            if (!key) {
+                showResult("Please enter a key", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/get/${encodeURIComponent(key)}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`GET SUCCESS\n${JSON.stringify(data, null, 2)}`, "success");
+                } else if (response.status === 404) {
+                    showResult(`Key '${key}' not found`, "warning");
+                } else {
+                    const error = await response.json();
+                    showResult(`GET FAILED\n${JSON.stringify(error, null, 2)}`, "error");
+                }
+            } catch (error) {
+                showResult(`Network Error: ${error.message}`, "error");
+            }
+        }
+
+        async function deleteKey() {
+            const key = document.getElementById("key").value.trim();
+
+            if (!key) {
+                showResult("Please enter a key", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/delete/${encodeURIComponent(key)}`, {
+                    method: "DELETE"
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`DELETE SUCCESS\n${JSON.stringify(data, null, 2)}`, "success");
+                } else if (response.status === 404) {
+                    showResult(`Key '${key}' not found`, "warning");
+                } else {
+                    const error = await response.json();
+                    showResult(`DELETE FAILED\n${JSON.stringify(error, null, 2)}`, "error");
+                }
+            } catch (error) {
+                showResult(`Network Error: ${error.message}`, "error");
+            }
+        }
+
+        function clearInputs() {
+            document.getElementById("key").value = "";
+            document.getElementById("value").value = "";
+            document.getElementById("ttl").value = "";
+            showResult("Inputs cleared", "info");
+        }
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("statusIndicator").className = "status-indicator status-online";
+                    document.getElementById("storeSize").textContent = data.store_size || 0;
+                } else {
+                    document.getElementById("statusIndicator").className = "status-indicator status-offline";
+                }
+            } catch (error) {
+                document.getElementById("statusIndicator").className = "status-indicator status-offline";
+            }
+        }
+
+        async function refreshStats() {
+            try {
+                const response = await fetch(`${API_URL}/stats`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("storeSize").textContent = data.total_keys || 0;
+                    document.getElementById("uptime").textContent = Math.round(data.uptime_seconds || 0);
+                    document.getElementById("cacheHits").textContent = data.cache_hits || 0;
+                    document.getElementById("cacheMisses").textContent = data.cache_misses || 0;
+                }
+            } catch (error) {
+                console.error("Failed to refresh stats:", error);
+            }
+        }
+
+        async function refreshPerformance() {
+            try {
+                const response = await fetch(`${API_URL}/performance`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("opsPerSec").textContent = data.operations_per_second?.toFixed(1) || "0.0";
+                    document.getElementById("avgLatency").textContent = data.avg_latency_ms?.toFixed(2) || "0.00";
+                    document.getElementById("errorRate").textContent = data.error_rate?.toFixed(1) || "0.0";
+                    document.getElementById("p95Latency").textContent = data.p95_latency_ms?.toFixed(2) || "0.00";
+
+                    document.getElementById("performanceDetails").textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                document.getElementById("performanceDetails").textContent = `Error loading performance data: ${error.message}`;
+            }
+        }
+
+        async function triggerCompaction() {
+            try {
+                const response = await fetch(`${API_URL}/compact`, { method: "POST" });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult(`COMPACTION TRIGGERED\n${JSON.stringify(data, null, 2)}`, "success");
+                } else {
+                    showResult(`COMPACTION FAILED\n${JSON.stringify(data, null, 2)}`, "error");
+                }
+            } catch (error) {
+                showResult(`Network Error: ${error.message}`, "error");
+            }
+        }
+
+        function showResult(message, type = "info") {
+            const resultDiv = document.getElementById("result");
+            resultDiv.textContent = message;
+
+            // Add visual feedback based on type
+            resultDiv.style.borderLeft = type === "success" ? "4px solid #28a745" :
+                type === "error" ? "4px solid #dc3545" :
+                    type === "warning" ? "4px solid #ffc107" :
+                        "4px solid #17a2b8";
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 's':
+                        event.preventDefault();
+                        setKey();
+                        break;
+                    case 'g':
+                        event.preventDefault();
+                        getKey();
+                        break;
+                    case 'd':
+                        event.preventDefault();
+                        deleteKey();
+                        break;
+                    case 'r':
+                        event.preventDefault();
+                        refreshStats();
+                        refreshPerformance();
+                        break;
+                }
+            }
         });
-    }
-
-    function deleteKey() {
-        const key = document.getElementById("key").value;
-
-        fetch(API_URL + "/delete/" + key, { method: "DELETE" })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("result").innerText =
-                "DELETE RESULT: " + JSON.stringify(data);
-        });
-    }
-</script>
+    </script>
 
 </body>
+
 </html>

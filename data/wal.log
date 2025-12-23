@@ -1,21 +1,3 @@
-SET|name|pykv
-SET|name|pykv
-SET|name|kartiki
-SET|name|kartiki
-SET|name|kartiki
-SET|name|kartiki
-SET|name|kartiki
-SET|name|kartiki
-SET|name|kartiki
-SET|name|kartiki
-SET|name|Kartiki
-SET|name|kartiki
-DEL|name|None
-SET|name|kartiki
-SET|age|20
-SET|age|20
-SET|name|pratik
-SET|name|arjan
-SET|name|
-SET|name|arjan
-SET|help|new
+{"timestamp": 1766258140.264248, "action": "SET", "key": "user", "value": "123", "ttl": null}
+{"timestamp": 1766258140.267677, "action": "SET", "key": "user2", "value": "123", "ttl": null}
+{"timestamp": 1766258140.267677, "action": "SET", "key": "user5", "value": "123", "ttl": null}
